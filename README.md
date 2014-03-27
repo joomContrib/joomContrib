@@ -1,4 +1,4 @@
 joomContrib
 ===========
 
- Extra packages for [Joomla Framework](github.com/joomla/joomla-framework/)
+ Extra packages for [Joomla Framework](https://github.com/joomla/joomla-framework/)

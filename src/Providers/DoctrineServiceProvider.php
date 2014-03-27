@@ -1,9 +1,9 @@
 <?php
 /**
- * Doctrine Entity Manager service provider
- *
- * @copyright  Copyright (C) 2014 joomContrib Team. All rights reserved.
- * @license    GNU Lesser General Public License version 2 or later; see LICENSE.txt
+ * @name       DoctrineServiceProvider
+ * @package    joomContrib\Providers
+ * @copyright  Copyright (C) 2014 joomContrib Team (https://github.com/orgs/joomContrib). All rights reserved.
+ * @license    GNU Lesser General Public License version 2 or later; see https://www.gnu.org/licenses/lgpl.html
  */
 
 namespace joomContrib\Providers;
