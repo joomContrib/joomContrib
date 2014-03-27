@@ -1,0 +1,18 @@
+{
+	"name": "joomContrib/joomContrib",
+	"type": "joomla-package",
+	"description": "",
+	"keywords": ["joomla", "framework"],
+	"homepage": "https://github.com/joomContrib/joomContrib",
+	"license": [
+		"LGPL-2.1"
+	],
+	"require": {
+		"php": ">=5.3.10"
+	},
+	"autoload": {
+		"psr-4": {
+			"joomContrib\\": "src/"
+		}
+	}
+}
