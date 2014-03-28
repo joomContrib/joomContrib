@@ -23,7 +23,7 @@ $container = (new \Joomla\DI\Container)
 
 
 // Mechanism to retrieve EntityManager
-$entityManager = $container->get('EntityManager');
+$entityManager = $container->get('em');
 
 
 return ConsoleRunner::createHelperSet($entityManager);
