@@ -7,7 +7,7 @@ Instead of using constants like `APPLICATION_ROOT`, register `app_root` object w
 
 For example in your front controller:
 
-`PHP
+```PHP
 // Define app root
 $app_root = realpath(__DIR__ . '/..');
 
@@ -116,7 +116,8 @@ class OrmController
 __make sure path to configuration is correct in `/bin/config/cli-config.php`__
 
 ```
-bin/doctrine orm:info
+>cd bin
+>doctrine orm:info
 
 Found 2 mapped entities:
 [OK]   Component\PresentationComponent\Entity\Profile
@@ -130,13 +131,7 @@ Found 2 mapped entities:
 
 - `config`
 
-	- database
-		- driver
-		- host
-		- name
-		- user
-		- password
-		- prefix (optional)
+	- database: driver, host, name, user, password, prefix (optional)
 
 - `app_root`
 
