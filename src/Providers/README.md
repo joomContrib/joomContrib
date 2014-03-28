@@ -2,6 +2,28 @@
 
 Common service providers
 
+Some providers work with the filesystem and thus require information about the application root location.
+Instead of using constants like `APPLICATION_ROOT`, register `app_root` object within the container:
+
+For example in your front controller:
+
+`PHP
+// Define app root
+$app_root = realpath(__DIR__ . '/..');
+
+// Add autoloader
+include $app_root . '/vendor/autoload.php';
+
+
+// Instantiate app
+$app = new \app\WebApplication;
+
+// Add app_root to app container
+$container = $app->getContainer();
+$container->share('app_root', $app_root, true);
+
+$app->execute();
+```
 
 ### Config
 
@@ -45,8 +67,8 @@ Doctrine ORM entity manager
 
 #### Accepted parameters
 
-- `$paths`: Paths to Entities. If empty, will add all folders that match `[app_root]/src/Component/*/Entities` pattern
-- `$metadataType`: Entities metadata type. Defaults to `annotation`.
+- `$paths`: Paths to Entities or glob pattern to lookup. If empty, will add all folders that match `[app_root]/src/Component/*/Entities` pattern.
+- `$metadataType`: Entities metadata type. Available options are `annotation` (default), `xml`, `yaml`.
 - `$excludes`: Tables to exclude. Defaults to `array('session')`
 
 
@@ -102,7 +124,7 @@ Found 2 mapped entities:
 ```
 
 
-####Dependecies
+#### Dependecies
 
 **Services**
 

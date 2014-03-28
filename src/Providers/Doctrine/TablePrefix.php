@@ -1,9 +1,9 @@
 <?php
 /**
- * @name       TablePrefix
- * @package    joomContrib\Providers\Doctrine
- * @copyright  Copyright (C) 2014 joomContrib Team (https://github.com/orgs/joomContrib). All rights reserved.
- * @license    GNU Lesser General Public License version 2 or later; see https://www.gnu.org/licenses/lgpl.html
+ * Doctrine Entity Manager service provider
+ *
+ * @copyright  Copyright (C) 2014 joomContrib Team. All rights reserved.
+ * @license    GNU Lesser General Public License version 2 or later; see LICENSE.txt
  */
 
 namespace joomContrib\Providers\Doctrine;
@@ -13,7 +13,7 @@ use Doctrine\ORM\Event\LoadClassMetadataEventArgs;
 /**
  * loadClassMetadata Listener
  *
- * @see  http://docs.doctrine-project.org/en/2.0.x/cookbook/sql-table-prefixes.html
+ * @see  Doctrine Table prefixes  http://docs.doctrine-project.org/en/2.0.x/cookbook/sql-table-prefixes.html
  */
 class TablePrefix
 {

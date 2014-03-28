@@ -1,9 +1,9 @@
 <?php
 /**
- * @name       DoctrineServiceProvider
- * @package    joomContrib\Providers
- * @copyright  Copyright (C) 2014 joomContrib Team (https://github.com/orgs/joomContrib). All rights reserved.
- * @license    GNU Lesser General Public License version 2 or later; see https://www.gnu.org/licenses/lgpl.html
+ * Doctrine Entity Manager service provider
+ *
+ * @copyright  Copyright (C) 2014 joomContrib Team. All rights reserved.
+ * @license    GNU Lesser General Public License version 2 or later; see LICENSE.txt
  */
 
 namespace joomContrib\Providers;
@@ -35,11 +35,11 @@ class DoctrineServiceProvider implements ServiceProviderInterface
 	/**
 	 * Paths to entities
 	 *
-	 * @var    array
+	 * @var    array|string
 	 *
 	 * @since  1.0
 	 */
-	protected $paths = array();
+	protected $paths;
 
 	/**
 	 * Metadata type
@@ -53,36 +53,33 @@ class DoctrineServiceProvider implements ServiceProviderInterface
 	/**
 	 * Constructor.
 	 *
-	 * @param  array   $paths          Paths to lookup for entities
-	 * @param  string  $metadataType   Format (annotation|yaml|xml)
-	 * @param  array   $excludes       Tables to exclude
+	 * @param  string|array  $paths         Paths to lookup for entities or glob pattern
+	 * @param  string        $metadataType  Format (annotation|yaml|xml)
+	 * @param  array         $excludes      Tables to exclude
 	 *
 	 * @since  1.0
 	 */
-	public function __construct(array $paths = null, $metadataType = 'annotation', array $excludes = array('session'))
+	public function __construct($paths = null, $metadataType = 'annotation', array $excludes = array('session'))
 	{
-		$this->excludes = $excludes;
-		$this->paths = $paths;
+		$this->paths = $paths ?: 'src/Component/*/Entity';
 		$this->metadataType = $metadataType;
+		$this->excludes = $excludes;
 	}
 
 	/**
 	 * Get default entity paths
 	 *
+	 * @param   string  $lookupPattern
 	 * @param   string  $app_root
 	 *
 	 * @return  array
 	 *
 	 * @since  1.0
 	 */
-	protected function getEntityPaths($app_root = null)
+	protected function findEntityPaths($app_root, $lookupPattern = '')
 	{
-		// Get path to components
-		$componentsPath = $app_root . '/src/Component';
-
-		// Get paths to entities withing components
-		$paths = glob($componentsPath . '/*/Entity');
-
+		// Get paths to entities within components
+		$paths = glob($app_root . '/' . $lookupPattern);
 
 		return $paths;
 	}
@@ -94,33 +91,30 @@ class DoctrineServiceProvider implements ServiceProviderInterface
 	 *
 	 * @return  void
 	 *
-	 * @since  1.0
-	 *
-	 * @see  Doctrine Table prefixes  http://docs.doctrine-project.org/en/2.0.x/cookbook/sql-table-prefixes.html
-	 * @see  http://stackoverflow.com/questions/7504073/how-to-setup-table-prefix-in-symfony2
-	 * @see  https://github.com/doctrine/doctrine2/blob/master/lib/Doctrine/ORM/EntityManager.php
+	 * @since   1.0
 	 */
 	public function register(Container $container)
 	{
-		$app_root = $container->exists('app_root') ? $container->get('app_root') : null;
+		$app_root = ($container->exists('app_root')) ? $container->get('app_root') : '';
 
 		// Prepare variables to pass
-		$paths = $this->paths ?: $this->getEntityPaths($app_root);
+		$paths = (is_array($this->paths)) ? $this->paths : $this->findEntityPaths($app_root, $this->paths);
+
 		$metadataType = $this->metadataType;
 		$excludes = $this->excludes;
 
 		// Share object
 		$container->share(
 			'Doctrine\\ORM\\EntityManager',
-			function (Container $c) use ($container, $paths, $metadataType, $excludes)
+			function (Container $c) use ($paths, $metadataType, $excludes)
 			{
 				$evm = null;
 
 				// Get app config
-				$appConfig = $container->get('config');
+				$appConfig = $c->get('config');
 
 				// Create a simple "default" Doctrine ORM configuration for Annotations
-				$isDevMode = $appConfig->get('debug', true);
+				$isDevMode = $appConfig->get('debug', false);
 
 				// Create doctrine configuration from entities
 				switch($metadataType)
@@ -142,11 +136,11 @@ class DoctrineServiceProvider implements ServiceProviderInterface
 
 				// Database configuration parameters
 				$conn = array(
-					'driver' => $appConfig->get('database.driver'),
-					'host' => $appConfig->get('database.host'),
-					'dbname' => $appConfig->get('database.name'),
-					'user' => $appConfig->get('database.user'),
-					'password' => $appConfig->get('database.password'),
+					'driver' 	=> $appConfig->get('database.driver'),
+					'host' 		=> $appConfig->get('database.host'),
+					'dbname' 	=> $appConfig->get('database.name'),
+					'user' 		=> $appConfig->get('database.user'),
+					'password' 	=> $appConfig->get('database.password'),
 				);
 
 
@@ -176,8 +170,7 @@ class DoctrineServiceProvider implements ServiceProviderInterface
 				}
 
 
-				// Apply excludes (session tables)
-				// Use regex: ^(?!session|abc$).*
+				// To apply excludes use regex in format: ^(?!session|abc$).*
 				if (!empty($excludes))
 				{
 					$regexp = '~^(?!' . implode('|', $excludes) . ').*$~';
@@ -185,7 +178,7 @@ class DoctrineServiceProvider implements ServiceProviderInterface
 				}
 
 
-				// Obtaining the entity manager
+				// Obtain the entity manager
 				$entityManager = EntityManager::create($conn, $config, $evm);
 
 
