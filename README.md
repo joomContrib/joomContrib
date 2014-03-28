@@ -1,7 +1,7 @@
 joomContrib
 ===========
 
- Extra packages for [Joomla Framework](github.com/joomla/joomla-framework/)
+ Extra packages for [Joomla Framework](http://framework.joomla.org/)
 
 ## App configuration
 
