@@ -28,7 +28,7 @@ use Monolog\Handler\SwiftMailerHandler;
  *
  * @since   1.0
  */
-class MonologLogProvider implements ServiceProviderInterface
+class MonologServiceProvider implements ServiceProviderInterface
 {	
 	/**
 	 * Registers the service provider within a DI container.
