@@ -14,5 +14,15 @@
 		"psr-4": {
 			"joomContrib\\": "src/"
 		}
+	},
+	"suggeset": {
+		"joomla/di" : "~1.1",
+		"joomla/database" : "~1.1",
+		"joomla/registry" : "~1.1",
+
+		"doctrine/orm" : "~2.4",
+
+		"symfony/yaml" : "~2.0",
+		"symfony/http-foundation": "~2.4"
 	}
 }
