@@ -50,7 +50,7 @@ class DatabaseServiceProvider implements ServiceProviderInterface
 			// Set options for database.
 			$options = (array) $config->get('database');
 			// Set debug.
-			$debug   = $config->get('dbo.debug', false);
+			$debug   = $config->get('database.debug', false);
 			
 			// Create database factory and get driver.
 			$factory = new DatabaseFactory;
