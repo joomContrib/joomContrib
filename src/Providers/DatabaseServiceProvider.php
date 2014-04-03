@@ -14,6 +14,17 @@ use Joomla\DI\ServiceProviderInterface;
 
 /**
  * Creates a database object for the application.
+ * 
+ * Config options:
+ * "database":{
+ * 		"host": "localhost",
+ * 		"driver": "mysqli",
+ * 		"database": "db name",
+ * 		"prefix": "pref_",
+ * 		"user": "username",
+ * 		"password": "123456789",
+ * 		"debug": false
+ * 	}
  *
  * @since   1.0
  */
@@ -34,22 +45,25 @@ class DatabaseServiceProvider implements ServiceProviderInterface
 		{
 			// Get config from container.
 			$config  = $c->get('config');
-			
+			// Get logger.
+			$logger  = $c->get('logger');
 			// Set options for database.
-			$options = (array) $config->get('db');
-			
+			$options = (array) $config->get('database');
 			// Set debug.
-			$debug   = $config->get('system.debug_db', false);
+			$debug   = $config->get('dbo.debug', false);
 			
 			// Create database factory and get driver.
 			$factory = new DatabaseFactory;
 			$db      = $factory->getDriver($options['driver'], $options);
 			
 			// Set logger, debug and select db.
-			$db->setLogger($c->get('logger'));
+			$db->setLogger($logger);
 			$db->setDebug($debug);
 			$db->select($options['database']);
-	
+
+			// Push a msg to the log.
+			$logger->debug('Database Container created.');
+			
 			return $db;
 		},
 		true, true);
