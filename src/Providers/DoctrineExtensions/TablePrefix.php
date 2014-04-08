@@ -6,7 +6,7 @@
  * @license    GNU Lesser General Public License version 2 or later; see LICENSE.txt
  */
 
-namespace joomContrib\Providers\Doctrine;
+namespace joomContrib\Providers\DoctrineExtensions;
 
 use Doctrine\ORM\Event\LoadClassMetadataEventArgs;
 
@@ -15,7 +15,7 @@ use Doctrine\ORM\Event\LoadClassMetadataEventArgs;
  *
  * @see  Doctrine Table prefixes  http://docs.doctrine-project.org/en/2.0.x/cookbook/sql-table-prefixes.html
  */
-class TablePrefix
+class TablePrefix implements \Doctrine\Common\EventSubscriber
 {
 	/**
 	 * Table prefix
@@ -40,16 +40,30 @@ class TablePrefix
 		$this->prefix = (string) $prefix;
 	}
 
+	public function getSubscribedEvents()
+    {
+        return array('loadClassMetadata');
+    }
+
 	/**
 	 * Constructor.
 	 *
-	 * @param  LoadClassMetadataEventArgs  $eventArgs
+	 * @param   LoadClassMetadataEventArgs  $eventArgs
+	 *
+	 * @return  void
 	 *
 	 * @since  1.0
 	 */
 	public function loadClassMetadata(LoadClassMetadataEventArgs $eventArgs)
 	{
 		$classMetadata = $eventArgs->getClassMetadata();
+
+		// Do not re-apply the prefix in an inheritance hierarchy.
+		if ($classMetadata->isInheritanceTypeSingleTable() && !$classMetadata->isRootEntity())
+		{
+			return;
+        }
+
 		$classMetadata->setTableName($this->prefix . $classMetadata->getTableName());
 
 		foreach ($classMetadata->getAssociationMappings() as $fieldName => $mapping)
@@ -60,5 +74,7 @@ class TablePrefix
 				$classMetadata->associationMappings[$fieldName]['joinTable']['name'] = $this->prefix . $mappedTableName;
 			}
 		}
+
+		return;
 	}
 }

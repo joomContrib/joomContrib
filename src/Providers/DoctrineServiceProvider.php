@@ -16,6 +16,11 @@ use Doctrine\ORM\Tools\Setup,
 
 	Doctrine\Common\EventManager;
 
+// Use complex annotation reader
+use Doctrine\ORM\Mapping\Driver\AnnotationDriver,
+	Doctrine\Common\Annotations\AnnotationReader,
+	Doctrine\Common\Annotations\AnnotationRegistry;
+
 /**
  * Registers the Doctrine Entity Manager service provider
  *
@@ -59,7 +64,7 @@ class DoctrineServiceProvider implements ServiceProviderInterface
 	 *
 	 * @since  1.0
 	 */
-	public function __construct($paths = null, $metadataType = 'annotation', array $excludes = array('session'))
+	public function __construct($metadataType = 'annotation', $paths = null, array $excludes = array('session'))
 	{
 		$this->paths = $paths ?: 'src/Component/*/Entity';
 		$this->metadataType = $metadataType;
@@ -80,6 +85,38 @@ class DoctrineServiceProvider implements ServiceProviderInterface
 	{
 		// Get paths to entities within components
 		$paths = glob($app_root . '/' . $lookupPattern);
+
+
+		// Build entity namespace by location where config files are stored.
+		// path => className, see http://docs.doctrine-project.org/en/2.1/reference/yaml-mapping.html#simplified-yaml-driver
+		if ($this->metadataType == 'simplifiedYaml')
+		{
+			$appRootLength = strlen($app_root . '/src/');
+
+			$paths = array_flip($paths);
+			$entitiesSubfolder = 'Entity';
+
+
+			foreach ($paths as $location => &$fqcn)
+			{
+				// v1
+				$fqcn = preg_replace(
+					array('~^' . preg_quote($app_root) . '\/src\/((?:.[^\/]*\/){2}).*~', '~\/~'),
+					array('${1}' . $entitiesSubfolder, '\\'), 
+					$location
+				);
+			/*
+				// V2
+				$relativeLocation = str_replace('/', '\\', substr($location, $appRootLength));
+
+				$fqcnArray = explode('\\', $relativeLocation, 3);
+				$fqcnArray[2] = 'Entity';
+
+				$fqcn = implode('\\', $fqcnArray);
+			*/
+			}
+		}
+
 
 		return $paths;
 	}
@@ -116,9 +153,14 @@ class DoctrineServiceProvider implements ServiceProviderInterface
 				// Create a simple "default" Doctrine ORM configuration for Annotations
 				$isDevMode = $appConfig->get('debug', false);
 
+				$proxyDir = null;
+				$cache = null;
+
 				// Create doctrine configuration from entities
+				// See Doctrine\orm\libr\Doctrine\ORM\Mapping\Driver
 				switch($metadataType)
 				{
+					case 'yml':
 					case 'yaml':
 						$config = Setup::createYAMLMetadataConfiguration($paths, $isDevMode);
 						break;
@@ -127,9 +169,17 @@ class DoctrineServiceProvider implements ServiceProviderInterface
 						$config = Setup::createXMLMetadataConfiguration($paths, $isDevMode);
 						break;
 
-					default:
+					case null:
 					case 'annotation':
 						$config = Setup::createAnnotationMetadataConfiguration($paths, $isDevMode);
+						break;
+
+					// Non-standard drivers
+					default:
+					case 'simplifiedYaml':
+						$config = Setup::createConfiguration($isDevMode, $proxyDir, $cache);
+						$driver = '\\Doctrine\ORM\Mapping\Driver\\' . ucfirst($metadataType) . 'Driver';
+						$config->setMetadataDriverImpl(new $driver($paths));
 						break;
 				}
 
@@ -151,7 +201,7 @@ class DoctrineServiceProvider implements ServiceProviderInterface
 				{
 					$evm = new \Doctrine\Common\EventManager;
 
-					$tablePrefix = new Doctrine\TablePrefix($prefix);
+					$tablePrefix = new DoctrineExtensions\TablePrefix($prefix);
 					$evm->addEventListener(\Doctrine\ORM\Events::loadClassMetadata, $tablePrefix);
 
 					// Process all excludes
@@ -164,8 +214,7 @@ class DoctrineServiceProvider implements ServiceProviderInterface
 						}
 
 						// Add prefix
-						// TODO: not sure if Doctrine takes care of this
-					//	$exclude = $prefix . $exclude;
+						$exclude = $prefix . $exclude;
 					}
 				}
 
@@ -176,7 +225,6 @@ class DoctrineServiceProvider implements ServiceProviderInterface
 					$regexp = '~^(?!' . implode('|', $excludes) . ').*$~';
 					$config->setFilterSchemaAssetsExpression($regexp);
 				}
-
 
 				// Obtain the entity manager
 				$entityManager = EntityManager::create($conn, $config, $evm);
