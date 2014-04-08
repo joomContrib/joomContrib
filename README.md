@@ -15,7 +15,7 @@ database:
     host     : "localhost"
     user     : "db_user"
     password : "db_user_password"
-    name     : "db_name"
+    database : "db_name"
     prefix   : "tables_prefix"
 
 

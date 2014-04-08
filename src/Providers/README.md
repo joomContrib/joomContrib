@@ -31,7 +31,7 @@ Configuration provider.
 
 #### Accepted parameters
 
-- `$path`: Absolute path to config file. May be any format that'c compatible with [RegistryFormat](https://github.com/joomla-framework/registry/tree/master/src/Format) (json, yaml, ini, php, xml)
+- `$path`: Absolute path to config file. May be any format that is compatible with [RegistryFormat](https://github.com/joomla-framework/registry/tree/master/src/Format) (json, yaml, ini, php, xml)
 - `$config` _(optional)_ Registry object to append new data to
  
 
@@ -113,7 +113,7 @@ class OrmController
 
 **Console**
 
-__make sure path to configuration is correct in `/bin/config/cli-config.php`__
+_Note: make sure path to configuration is correct in `/bin/config/cli-config.php`_
 
 ```
 >cd bin
@@ -131,7 +131,7 @@ Found 2 mapped entities:
 
 - `config`
 
-	- database: driver, host, name, user, password, prefix (optional)
+	- database: driver, host, database, user, password, prefix (optional)
 
 - `app_root`
 
@@ -142,6 +142,54 @@ Found 2 mapped entities:
 	"doctrine/orm": "~2.4"
 }
 ```
+
+
+### PDO
+
+PDO provider, so you don't have to require `Joomla\Database` for trivial tasks.
+
+Features:
+
+ - May use table prefixes now
+ - Uses configuration `pdo` options with fallback to `database` options
+
+
+#### Usage
+
+**Register**
+
+```PHP
+$container->registerServiceProvider(new \joomContrib\Providers\PdoServiceProvider);
+```
+
+**Retrieve and Use**
+
+```PHP
+$pdo = $container->get('pdo');
+
+$sth = $pdo->prepare('SELECT * FROM #__user WHERE username = :username');
+$sth->execute(array(':name' => $username));
+
+$data = $sth->fetchObject();
+```
+
+
+#### Dependencies
+
+**Services**
+
+- `config`
+
+	- database: driver, host, name, user, password, prefix (optional)
+	- pdo (same as above, optional)
+
+**PHP**
+
+The adequate php extension must be installed `php_pdo_[driver]`.
+
+**Packages**
+
+none
 
 
 ### Twig Renderer
