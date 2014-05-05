@@ -70,30 +70,39 @@ $app->execute();
 
 ---
 
-### Config
+### Configuration
 
 Configuration provider.
 
 #### Accepted parameters
 
 - `$path`: Absolute path to config file. May be any format that is compatible with [RegistryFormat](https://github.com/joomla-framework/registry/tree/master/src/Format) (json, yaml, ini, php, xml)
-- `$config` _(optional)_ Registry object to append new data to
+- `$config` _(optional)_: Registry object to append new data to
+- `$env` _(optional)_: Environment suffix to append to config filename. When null will load from `JFW_ENV` environment variable
  
 
 #### Usage
 
 **Register**
 
-```PHP
-$container->registerServiceProvider(new \joomContrib\Providers\ConfigServiceProvider(APP_ROOT . '/etc/config.yml');
+```php
+use joomContrib\Providers\ConfigurationServiceProvider;
+
+$container->registerServiceProvider(new ConfigurationServiceProvider($appRoot . '/etc/config.yml');
 ```
 
 **Retrieve**
 
-```PHP
+```php
 $config = $container->get('config');
 ```
 
+**Load without DI**
+```php
+use joomContrib\Providers\ConfigurationServiceProvider;
+
+$config = (new ConfigServiceProvider($appRoot . '/etc/config.yml'))->getConfiguration();
+```
 
 #### Dependencies
 
