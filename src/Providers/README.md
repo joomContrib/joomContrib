@@ -1,6 +1,49 @@
 ## Service Providers
 
-Common service providers
+### Naming conventions
+
+Services are registered by the returned class name and aliased by provider name, ie:
+
+The `DatabaseServiceProvider`
+- registered as `\\Joomla\\Database\\DatabaseDriver`
+- alias `database`
+
+Using this it's possible to build objects using Dependency Injection Container:
+
+```PHP
+use Joomla\Database\DatabaseDriver;
+
+class Helper
+{
+	public function __construct(DatabaseDriver $db)
+	{
+		$this->db = $db;
+	}
+
+	public function getSomething()
+	{
+		return $this->db->execute('SELECT * FROM #__something')->loadObjectList();
+	}
+}
+
+class MyController
+{
+	use ContainerAwareTrait;
+
+	public function execute()
+	{
+		$container = $this->getContainer();
+
+		$helper = $container->buildObject('Helper');
+
+		return $helper->getSomething();
+	}
+}
+
+```
+
+
+### Common service providers
 
 Some providers work with the filesystem and thus require information about the application root location.
 Instead of using constants like `APPLICATION_ROOT`, register `app_root` object within the container:
@@ -24,6 +67,8 @@ $container->share('app_root', $app_root, true);
 
 $app->execute();
 ```
+
+---
 
 ### Config
 
@@ -60,6 +105,7 @@ $config = $container->get('config');
 }
 ```
 
+---
 
 ### Doctrine
 
@@ -143,10 +189,13 @@ Found 2 mapped entities:
 }
 ```
 
+---
 
 ### PDO
 
 PDO provider, so you don't have to require `Joomla\Database` for trivial tasks.
+
+_Warning: Using two connections (PDO + Joomla\Daabase) may cause problems, see [MySQL server has gone away](http://dev.mysql.com/doc/refman/5.0/en/gone-away.html)_
 
 Features:
 
@@ -190,6 +239,9 @@ The adequate php extension must be installed `php_pdo_[driver]`.
 **Packages**
 
 none
+
+
+---
 
 
 ### Twig Renderer

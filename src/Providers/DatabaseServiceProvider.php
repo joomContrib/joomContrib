@@ -41,7 +41,7 @@ class DatabaseServiceProvider implements ServiceProviderInterface
 	public function register(Container $container)
 	{
 		// Set a container for the db (shared, protected).
-		$container->set('db', function (Container $c)
+		$container->set('Joomla\\Database\\DatabaseDriver', function (Container $c)
 		{
 			// Get config from container.
 			$config  = $c->get('config');
@@ -67,5 +67,8 @@ class DatabaseServiceProvider implements ServiceProviderInterface
 			return $db;
 		},
 		true, true);
+
+
+		$container->alias('database', 'Joomla\\Database\\DatabaseDriver');
 	}
 }
