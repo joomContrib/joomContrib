@@ -94,7 +94,7 @@ $container->registerServiceProvider(new ConfigurationServiceProvider($appRoot . 
 **Retrieve**
 
 ```php
-$config = $container->get('config');
+$config = $container->get('configuration');
 ```
 
 **Load without DI**
